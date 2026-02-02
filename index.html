@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inspección Preoperacional - USOCOELLO</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        header {
+            background-color: #007bff;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .slogan {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        section {
+            padding: 20px;
+            margin: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #007bff;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        .inspection-item {
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        select, textarea, input {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #inspectionsList {
+            list-style-type: none;
+            padding: 0;
+        }
+        #inspectionsList li {
+            background-color: #e9ecef;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>MANTENIMIENTO USOCOELLO</h1>
+        <div class="slogan">USOCOELLO PUEDES?</div>
+    </header>
+
+    <section id="formSection">
+        <h2>Inspección Preoperacional</h2>
+        <form id="inspectionForm">
+            <label>Fecha:</label>
+            <input type="date" id="date" required>
+            
+            <label>Vehículo/Placa:</label>
+            <input type="text" id="vehicle" placeholder="Ej: Excavadora ABC-123" required>
+            
+            <label>Operador:</label>
+            <input type="text" id="operator" placeholder="Nombre del operador" required>
+            
+            <h3>Partes a Inspeccionar:</h3>
+            <div class="inspection-item">
+                <span>Frenos</span>
+                <select id="brakes">
+                    <option value="ok">OK</option>
+                    <option value="fail">Falla</option>
+                </select>
+            </div>
+            <div class="inspection-item">
+                <span>Luces</span>
+                <select id="lights">
+                    <option value="ok">OK</option>
+                    <option value="fail">Falla</option>
+                </select>
+            </div>
+            <div class="inspection-item">
+                <span>Motor</span>
+                <select id="engine">
+                    <option value="ok">OK</option>
+                    <option value="fail">Falla</option>
+                </select>
+            </div>
+            <div class="inspection-item">
+                <span>Neumáticos</span>
+                <select id="tires">
+                    <option value="ok">OK</option>
+                    <option value="fail">Falla</option>
+                </select>
+            </div>
+            <div class="inspection-item">
+                <span>Sistema Hidráulico</span>
+                <select id="hydraulics">
+                    <option value="ok">OK</option>
+                    <option value="fail">Falla</option>
+                </select>
+            </div>
+            
+            <label>Notas Adicionales:</label>
+            <textarea id="notes" rows="3" placeholder="Observaciones..."></textarea>
+            
+            <button type="submit">Guardar Inspección</button>
+        </form>
+    </section>
+
+    <section id="listSection">
+        <h2>Inspecciones Previas</h2>
+        <ul id="inspectionsList"></ul>
+    </section>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
+
+        const form = document.getElementById('inspectionForm');
+        const list = document.getElementById('inspectionsList');
+
+        // Cargar inspecciones guardadas
+        function loadInspections() {
+            const inspections = JSON.parse(localStorage.getItem('inspections')) || [];
+            list.innerHTML = '';
+            inspections.forEach((insp, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <strong>[1m${insp.date} - ${insp.vehicle}[0m</strong><br>
+                    Operador: ${insp.operator}<br>
+                    Frenos: ${insp.brakes}, Luces: ${insp.lights}, Motor: ${insp.engine}, Neumáticos: ${insp.tires}, Hidráulico: ${insp.hydraulics}<br>
+                    Notas: ${insp.notes || 'Ninguna'}
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        // Guardar nueva inspección
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const inspection = {
+                date: document.getElementById('date').value,
+                vehicle: document.getElementById('vehicle').value,
+                operator: document.getElementById('operator').value,
+                brakes: document.getElementById('brakes').value,
+                lights: document.getElementById('lights').value,
+                engine: document.getElementById('engine').value,
+                tires: document.getElementById('tires').value,
+                hydraulics: document.getElementById('hydraulics').value,
+                notes: document.getElementById('notes').value
+            };
+            const inspections = JSON.parse(localStorage.getItem('inspections')) || [];
+            inspections.push(inspection);
+            localStorage.setItem('inspections', JSON.stringify(inspections));
+            loadInspections();
+            form.reset();
+            alert('Inspección guardada exitosamente.');
+        });
+
+        // Cargar al inicio
+        loadInspections();
+    </script>
+</body>
+</html>
